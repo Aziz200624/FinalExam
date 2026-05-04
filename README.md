@@ -1,12 +1,15 @@
 # Group Management App
 
-Simple CRUD app for managing groups/communities. Built with Node.js and PostgreSQL.
+Simple CRUD app for managing groups/communities with REST API, web UI, and automated testing.
 
 ## Stack
 
-- Node.js, Express
-- PostgreSQL
-- jQuery for frontend
+- Node.js + Express
+- PostgreSQL (current backend)
+- HTML + jQuery frontend
+- Jest + SuperTest (API tests with mocked DB)
+- Cypress (E2E tests)
+- Artillery (load testing)
 
 ## Setup
 
@@ -15,9 +18,7 @@ Install dependencies:
 npm install
 ```
 
-Create PostgreSQL database called `groupmarketdb`
-
-Create `.env` file:
+Create `.env`:
 ```
 DB_HOST=localhost
 DB_PORT=5432
@@ -27,7 +28,7 @@ DB_PASSWORD=your_password
 PORT=3000
 ```
 
-Run db setup:
+Create DB + table:
 ```
 npm run setup-db
 ```
@@ -37,28 +38,78 @@ Start server:
 npm start
 ```
 
-Open http://localhost:3000
+Open [http://localhost:3000](http://localhost:3000).
 
-## API
+## REST API
 
-- GET /items - get all groups
-- GET /items/:id - get single group
-- POST /items - create group
-- PUT /items/:id - update group
-- DELETE /items/:id - delete group
+- `GET /items` - get all groups
+- `GET /items/:id` - get one group
+- `POST /items` - create group
+- `PUT /items/:id` - update group
+- `DELETE /items/:id` - delete group
 
-## DB Schema
+## Automated Testing
 
-groups table:
-- id (serial pk)
-- name (varchar)
-- description (text)
-- membersCount (int)
-- createdAt, updatedAt (timestamps)
+Run API tests:
+```
+npm test
+```
 
-## Files
+Run API tests with coverage:
+```
+npm run test:coverage
+```
 
-- server.js - express server and routes
-- database.js - pg connection
-- setup-database.js - creates tables
-- public/ - frontend stuff
+Run Cypress E2E tests (requires running server):
+```
+npm run test:e2e
+```
+
+Alternative one-command E2E run:
+```
+npm run test:e2e:with-server
+```
+
+## Load Testing (Artillery)
+
+Run load scenario:
+```
+npm run load:test
+```
+
+Generate markdown summary from JSON output:
+```
+npm run load:report
+```
+
+Artifacts are stored in `reports/`:
+- `artillery-report.json`
+- `artillery-summary.md`
+
+## MongoDB / PostgreSQL manual switch guide
+
+Current code uses PostgreSQL in `database.js`.  
+For your defense/demo, you can keep this project as PostgreSQL implementation and present MongoDB as an alternative adapter approach:
+
+1. Keep API contract unchanged (`/items` CRUD).
+2. Implement repository layer with methods:
+   - `getAll`
+   - `getById`
+   - `create`
+   - `update`
+   - `remove`
+3. Create two implementations:
+   - Postgres repository (existing SQL)
+   - Mongo repository (Mongoose or native driver)
+4. Switch by env variable (for example `DB_CLIENT=postgres|mongo`).
+5. In Jest tests, mock repository methods (never real DB connections).
+
+## Project Structure
+
+- `server.js` - Express app with CRUD routes
+- `database.js` - PostgreSQL connection
+- `setup-database.js` - DB/table initialization
+- `tests/api.test.js` - Jest + SuperTest tests (DB mocked)
+- `cypress/e2e/groups.cy.js` - E2E tests
+- `artillery/groups-load.yml` - load scenario
+- `scripts/artillery-summary.js` - load report summary generator

@@ -11,6 +11,20 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
 
+app.get('/health/db', async (req, res) => {
+  const status = await pool.getDbConnectionStatus();
+
+  if (status.ok) {
+    return res.json({ status: 'connected' });
+  }
+
+  return res.status(503).json({
+    status: 'disconnected',
+    code: status.code,
+    message: status.message,
+  });
+});
+
 // GET /items - Get all groups
 app.get('/items', async (req, res) => {
   try {
@@ -103,8 +117,18 @@ app.delete('/items/:id', async (req, res) => {
   }
 });
 
-// Start server
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
-});
+ if (require.main === module) {
+   app.listen(PORT, () => {
+     console.log(`Server is running on http://localhost:${PORT}`);
+    pool.getDbConnectionStatus().then((status) => {
+      if (status.ok) {
+        console.log('Database status: connected');
+      } else {
+        console.log(`Database status: disconnected (${status.code})`);
+      }
+    });
+   });
+ }
+
+module.exports = app;
 

@@ -6,7 +6,15 @@
   "scripts": {
     "start": "node server.js",
     "dev": "node server.js",
-    "setup-db": "node setup-database.js"
+    "setup-db": "node setup-database.js",
+    "test": "jest",
+    "test:coverage": "jest --coverage",
+    "cypress:open": "cypress open",
+    "cypress:run": "cypress run",
+    "test:e2e": "cypress run",
+    "test:e2e:with-server": "start-server-and-test start http://localhost:3000 cypress:run",
+    "load:test": "artillery run --output reports/artillery-report.json artillery/groups-load.yml",
+    "load:report": "node scripts/artillery-summary.js"
   },
   "keywords": ["express", "postgresql", "crud", "rest-api"],
   "author": "",
@@ -16,6 +24,13 @@
     "pg": "^8.11.3",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1"
+  },
+  "devDependencies": {
+    "artillery": "^2.0.27",
+    "cypress": "^14.5.4",
+    "jest": "^30.0.5",
+    "start-server-and-test": "^2.1.3",
+    "supertest": "^7.1.1"
   }
 }
 

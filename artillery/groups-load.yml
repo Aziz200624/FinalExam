@@ -1,0 +1,48 @@
+config:
+  target: "http://localhost:3000"
+  phases:
+    - duration: 30
+      arrivalRate: 5
+      name: warm-up
+    - duration: 60
+      arrivalRate: 15
+      name: sustained-load
+    - duration: 30
+      arrivalRate: 30
+      name: stress
+  defaults:
+    headers:
+      Content-Type: "application/json"
+
+scenarios:
+  - name: read-heavy-list
+    weight: 60
+    flow:
+      - get:
+          url: "/items"
+      - think: 1
+      - get:
+          url: "/items"
+
+  - name: mixed-crud
+    weight: 40
+    flow:
+      - post:
+          url: "/items"
+          json:
+            name: "Load Test Group {{$randomString()}}"
+            description: "created by artillery"
+            membersCount: 5
+          capture:
+            - json: "$.id"
+              as: "groupId"
+      - get:
+          url: "/items/{{ groupId }}"
+      - put:
+          url: "/items/{{ groupId }}"
+          json:
+            name: "Updated {{$randomString()}}"
+            description: "updated by artillery"
+            membersCount: 9
+      - delete:
+          url: "/items/{{ groupId }}"

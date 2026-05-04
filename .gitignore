@@ -8,6 +8,11 @@ node_modules/
 *.log
 npm-debug.log*
 
+# Test artifacts
+coverage/
+cypress/screenshots/
+cypress/videos/
+
 # OS files
 .DS_Store
 Thumbs.db
